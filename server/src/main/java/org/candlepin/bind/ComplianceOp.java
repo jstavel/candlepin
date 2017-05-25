@@ -82,4 +82,9 @@ public class ComplianceOp implements BindOperation {
         }
         // dont need to continue the chain as it is the last operation.
     }
+
+    @Override
+    public String getName() {
+        return "ComplianceOp";
+    }
 }

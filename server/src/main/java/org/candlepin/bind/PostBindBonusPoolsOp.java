@@ -52,4 +52,9 @@ public class PostBindBonusPoolsOp implements BindOperation {
         poolManager.checkBonusPoolQuantities(consumer.getOwner(), entitlements);
         chain.execute(context);
     }
+
+    @Override
+    public String getName() {
+        return "PostBindBonusPoolsOp";
+    }
 }

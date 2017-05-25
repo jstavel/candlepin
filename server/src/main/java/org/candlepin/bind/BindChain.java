@@ -14,7 +14,13 @@
  */
 package org.candlepin.bind;
 
+import org.candlepin.controller.CandlepinPoolManager;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,7 +31,8 @@ public class BindChain {
     private List<BindOperation> operations;
     private int preProcessIndex = -1;
     private int executeIndex = -1;
-
+    private Date lastTime = new Date();
+    private static Logger log = LoggerFactory.getLogger(BindChain.class);
     public BindChain() {
         operations = new ArrayList<BindOperation>();
     }
@@ -33,7 +40,13 @@ public class BindChain {
     public void preProcess(BindContext context) {
         preProcessIndex++;
         if (preProcessIndex < operations.size()) {
+            Date date = new Date();
+            long diff = (date).getTime() - lastTime.getTime();
+            log.error("Vritant starting preprocess "+operations.get(preProcessIndex).getName()+ "after"+
+                diff);
+            lastTime = date;
             operations.get(preProcessIndex).preProcess(context, this);
+
         }
     }
 
@@ -41,6 +54,13 @@ public class BindChain {
         executeIndex++;
 
         if (executeIndex < operations.size()) {
+
+            Date date = new Date();
+            long diff = (date).getTime() - lastTime.getTime();
+            log.error("Vritant starting execute "+ operations.get(executeIndex).getName()+ "after"+
+                diff);
+            lastTime = date;
+
             operations.get(executeIndex).execute(context, this);
         }
     }

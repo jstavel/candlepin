@@ -102,4 +102,9 @@ public class HandleCertificatesOp implements BindOperation {
         }
         chain.execute(context);
     }
+
+    @Override
+    public String getName() {
+        return "HandleCertificatesOp";
+    }
 }

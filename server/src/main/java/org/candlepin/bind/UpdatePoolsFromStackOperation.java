@@ -67,4 +67,9 @@ public class UpdatePoolsFromStackOperation implements BindOperation {
         }
         chain.execute(context);
     }
+
+    @Override
+    public String getName() {
+        return "UpdatePoolsFromStackOperation";
+    }
 }

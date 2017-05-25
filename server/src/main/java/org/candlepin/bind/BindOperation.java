@@ -29,4 +29,6 @@ public interface BindOperation {
      * creates or updates from the pre=process step.
      */
     void execute(BindContext context, BindChain chain);
+
+    String getName();
 }

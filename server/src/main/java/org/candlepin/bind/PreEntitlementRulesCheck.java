@@ -98,6 +98,11 @@ public class PreEntitlementRulesCheck implements BindOperation {
         chain.execute(context);
     }
 
+    @Override
+    public String getName() {
+        return "PreEntitlementRulesCheck";
+    }
+
     private EntitlementRefusedException checkResults() {
         boolean success = true;
         for (Map.Entry<String, ValidationResult> entry : results.entrySet()) {

@@ -95,4 +95,9 @@ public class HandleEntitlementsOp implements BindOperation {
         poolCurator.updateAll(poolsToSave, false, false);
         chain.execute(context);
     }
+
+    @Override
+    public String getName() {
+        return "HandleEntitlementsOp";
+    }
 }
