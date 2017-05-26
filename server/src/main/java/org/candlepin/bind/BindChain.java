@@ -32,6 +32,7 @@ public class BindChain {
     private int preProcessIndex = -1;
     private int executeIndex = -1;
     private Date lastTime = new Date();
+    private String lastName = "nothing";
     private static Logger log = LoggerFactory.getLogger(BindChain.class);
     public BindChain() {
         operations = new ArrayList<BindOperation>();
@@ -42,12 +43,28 @@ public class BindChain {
         if (preProcessIndex < operations.size()) {
             Date date = new Date();
             long diff = (date).getTime() - lastTime.getTime();
-            log.error("Vritant starting preprocess "+operations.get(preProcessIndex).getName()+ " after "+
-                diff);
+            log.error("Vritant "+lastName+ " took " + diff);
             lastTime = date;
+            lastName = operations.get(preProcessIndex).getName();
             operations.get(preProcessIndex).preProcess(context, this);
 
         }
+    }
+
+    public void lock(BindContext context) {
+        Date date = new Date();
+        long diff = (date).getTime() - lastTime.getTime();
+        log.error("Vritant requesting lock. " + lastName + " took " +
+            diff);
+        lastTime = date;
+        lastName = "lock request";
+        context.lockPools();
+        Date date2 = new Date();
+        long diff2 = (date2).getTime() - lastTime.getTime();
+        log.error("Vritant received lock. " + lastName + " took " +
+            diff2);
+        lastTime = date;
+        lastName = "lock request return";
     }
 
     public void execute(BindContext context) {
@@ -57,8 +74,9 @@ public class BindChain {
 
             Date date = new Date();
             long diff = (date).getTime() - lastTime.getTime();
-            log.error("Vritant starting execute "+ operations.get(executeIndex).getName()+ "after"+
+            log.error("Vritant  "+ lastName + " took " +
                 diff);
+            lastName = operations.get(executeIndex).getName();
             lastTime = date;
 
             operations.get(executeIndex).execute(context, this);

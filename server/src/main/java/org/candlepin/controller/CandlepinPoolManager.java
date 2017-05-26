@@ -1671,7 +1671,7 @@ public class CandlepinPoolManager implements PoolManager {
         // fetch and pre-process entities before locks are placed.
         chain.preProcess(context);
         if (context.getException() == null) {
-            context.lockPools();
+            chain.lock(context);
             // post lock operations
             chain.execute(context);
         }
