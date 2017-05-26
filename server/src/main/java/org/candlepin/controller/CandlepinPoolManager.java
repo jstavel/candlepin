@@ -1676,6 +1676,11 @@ public class CandlepinPoolManager implements PoolManager {
             chain.execute(context);
         }
 
+        Date date3 = new Date();
+        long diff2 = (date3).getTime() - chain.getLastTime().getTime();
+        log.error("Vritant done. " + chain.getLastName() + " took " +
+            diff2);
+
         //check again cause either pre process or execute can throw an exception.
         if (context.getException() != null) {
             throw context.getException();

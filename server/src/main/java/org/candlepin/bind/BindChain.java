@@ -86,4 +86,12 @@ public class BindChain {
     public void addOperation(BindOperation operation) {
         operations.add(operation);
     }
+
+    public Date getLastTime() {
+        return lastTime;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
 }
