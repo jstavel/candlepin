@@ -42,7 +42,7 @@ public class BindChain {
         if (preProcessIndex < operations.size()) {
             Date date = new Date();
             long diff = (date).getTime() - lastTime.getTime();
-            log.error("Vritant starting preprocess "+operations.get(preProcessIndex).getName()+ "after"+
+            log.error("Vritant starting preprocess "+operations.get(preProcessIndex).getName()+ " after "+
                 diff);
             lastTime = date;
             operations.get(preProcessIndex).preProcess(context, this);
