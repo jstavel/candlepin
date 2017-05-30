@@ -73,9 +73,7 @@ public class HandleEntitlementsOp implements BindOperation {
             Pool pool = lockedPools.get(entry.getKey()).getPool();
             Integer quantity = ent.getQuantity();
 
-            Set<Entitlement> ents = new HashSet<Entitlement>(pool.getEntitlements());
-            ents.add(ent);
-            pool.setEntitlements(ents);
+            pool.getEntitlements().add(ent);
             ent.setPool(pool);
             ent.setConsumer(consumer);
             ent.setOwner(consumer.getOwner());
