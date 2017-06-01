@@ -25,7 +25,10 @@ import org.candlepin.model.Product;
 
 import com.google.inject.Inject;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,6 +44,7 @@ public class HandleCertificatesOp implements BindOperation {
     private EntitlementCertificateCurator ecCurator;
     private EntitlementCurator eCurator;
     private Map<String, EntitlementCertificate> certs;
+    private Collection<String> modifyingEnts;
 
     @Inject
     public HandleCertificatesOp(EntitlementCertificateGenerator ecGenerator, EntitlementCertificateCurator
@@ -63,11 +67,13 @@ public class HandleCertificatesOp implements BindOperation {
             return;
         }
 
+        List<Pool> pools = new LinkedList<Pool>();
         Map<String, Product> products = new HashMap<String, Product>();
         Map<String, PoolQuantity> poolQuantities = context.getPoolQuantities();
         for (PoolQuantity poolQuantity : poolQuantities.values()) {
             Pool pool = poolQuantity.getPool();
             products.put(pool.getId(), pool.getProduct());
+            pools.add(pool);
         }
 
         certs = ecGenerator.generateEntitlementCertificates(context.getConsumer(),
@@ -75,6 +81,8 @@ public class HandleCertificatesOp implements BindOperation {
             poolQuantities,
             context.getEntitlementMap(),
             false);
+
+        modifyingEnts = this.eCurator.batchListModifying(context.getConsumer(), pools);
 
         chain.preProcess(context);
     }
@@ -96,9 +104,7 @@ public class HandleCertificatesOp implements BindOperation {
             }
             ecCurator.saveAll(certs.values(), false, false);
             eCurator.saveOrUpdateAll(ents.values(), false, false);
-            this.ecGenerator.regenerateCertificatesByEntitlementIds(
-                this.eCurator.batchListModifying(ents.values()), true
-            );
+            this.ecGenerator.regenerateCertificatesByEntitlementIds(modifyingEnts, true);
         }
         chain.execute(context);
     }

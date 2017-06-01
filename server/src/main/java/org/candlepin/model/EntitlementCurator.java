@@ -624,6 +624,54 @@ public class EntitlementCurator extends AbstractHibernateCurator<Entitlement> {
         return eids;
     }
 
+    /**
+     * A version of list Modifying that finds Entitlements that modify
+     * input entitlements.
+     * When dealing with large amount of entitlements for which it is necessary
+     * to determine their modifier products.
+     * @param entitlement
+     * @return Entitlements that are being modified by the input entitlements
+     */
+    public Collection<String> batchListModifying(Consumer consumer, List<Pool> pools) {
+        List<String> eids = new LinkedList<String>();
+
+        if (pools != null && pools.iterator().hasNext()) {
+            String hql =
+                "SELECT DISTINCT eOut.id" +
+                    "    FROM Entitlement eOut" +
+                    "        JOIN eOut.pool outPool" +
+                    "        JOIN outPool.providedProducts outProvided" +
+                    "        JOIN outProvided.productContent outProvContent" +
+                    "        JOIN outProvContent.content outContent" +
+                    "        JOIN outContent.modifiedProductIds outModProdId" +
+                    "    WHERE" +
+                    "        outPool.endDate >= current_date AND" +
+                    "        eOut.owner = :owner AND" +
+                    "        eOut.consumer = :consumer AND" +
+                    "        EXISTS (" +
+                    "            SELECT pIn" +
+                    "            FROM Pool pIn" +
+                    "                JOIN pIn.product inMktProd" +
+                    "                LEFT JOIN pIn.providedProducts inProvidedProd" +
+                    "            WHERE pIn in (:pin) AND" +
+                    "                  pIn.endDate >= outPool.startDate AND" +
+                    "                  pIn.startDate <= outPool.endDate AND" +
+                    "                  (inProvidedProd.id = outModProdId OR inMktProd.id = outModProdId))";
+
+            Query query = this.getEntityManager().createQuery(hql);
+
+            Iterable<List<Pool>> blocks = Iterables.partition(pools, getInBlockSize());
+            Owner owner = consumer.getOwner();
+            for (List<Pool> block : blocks) {
+                eids.addAll(query.setParameter("pin", block)
+                    .setParameter("consumer", consumer)
+                    .setParameter("owner", owner).getResultList());
+            }
+        }
+
+        return eids;
+    }
+
     public Collection<String> listModifying(Entitlement entitlement) {
         return batchListModifying(java.util.Arrays.asList(entitlement));
     }
