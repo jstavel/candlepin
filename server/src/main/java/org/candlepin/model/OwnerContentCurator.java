@@ -175,19 +175,29 @@ public class OwnerContentCurator extends AbstractHibernateCurator<OwnerContent> 
         }
 
         // Impl note: See getOwnersByContent for details on why we're doing this in two queries
-        String jpql = "SELECT oc.content.uuid FROM OwnerContent oc WHERE oc.owner.id = :owner_id";
+        // String jpql = "SELECT oc.content.uuid FROM OwnerContent oc WHERE oc.owner.id = :owner_id";
 
-        List<String> uuids = this.getEntityManager()
-            .createQuery(jpql, String.class)
-            .setParameter("owner_id", ownerId)
-            .getResultList();
+        // List<String> uuids = this.getEntityManager()
+        //     .createQuery(jpql, String.class)
+        //     .setParameter("owner_id", ownerId)
+        //     .getResultList();
+
+        Session session = this.currentSession();
+
+        List<String> uuids = session.createCriteria(OwnerContent.class)
+            .createAlias("owner", "owner")
+            .createAlias("content", "content")
+            .add(Restrictions.eq("owner.id", ownerId))
+            .add(CPRestrictions.in("content.id", contentIds))
+            .setProjection(Projections.property("content.uuid"))
+            .list();
 
         if (uuids != null && !uuids.isEmpty()) {
             DetachedCriteria criteria = this.createSecureDetachedCriteria(Content.class, null)
-                .add(CPRestrictions.in("uuid", uuids))
-                .add(CPRestrictions.in("id", contentIds));
+                .add(CPRestrictions.in("uuid", uuids));
+                // .add(CPRestrictions.in("id", contentIds));
 
-            return this.cpQueryFactory.<Content>buildQuery(this.currentSession(), criteria);
+            return this.cpQueryFactory.<Content>buildQuery(session, criteria);
         }
 
         return this.cpQueryFactory.<Content>buildQuery();
